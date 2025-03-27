@@ -153,6 +153,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contact
 
-Your Name - [@yourtwitter](https://twitter.com/yourtwitter) - email@example.com
+Arash Bordbar - [@bordbararash](https://twitter.com/bordbararash) - bordbar@fums.ac.ir
 
-Project Link: [https://github.com/yourusername/survey-project](https://github.com/yourusername/survey-project) 
