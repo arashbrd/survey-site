@@ -153,5 +153,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contact
 
-Arash Bordbar - [@bordbararash](https://twitter.com/bordbararash) - bordbar@fums.ac.ir
+Arash Bordbar - [@bordbararash](https://twitter.com/bordbararash) 
 
