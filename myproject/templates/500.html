@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}خطای سرور{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="error-page">
+                <h1 class="display-1 text-danger mb-4">500</h1>
+                <h2 class="mb-4">خطای سرور</h2>
+                <p class="lead mb-4">متاسفانه مشکلی در سرور رخ داده است. لطفاً چند دقیقه دیگر دوباره تلاش کنید.</p>
+                <div class="mt-4">
+                    <a href="{% url 'surveys:survey_list' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home ml-2"></i>
+                        بازگشت به صفحه اصلی
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    padding: 3rem;
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.error-page h1 {
+    font-size: 8rem;
+    font-weight: bold;
+    color: #dc3545;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.error-page h2 {
+    color: #333;
+    font-size: 2rem;
+}
+
+.error-page .lead {
+    color: #666;
+    font-size: 1.2rem;
+}
+
+.btn-primary {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+}
+</style>
+{% endblock %} 

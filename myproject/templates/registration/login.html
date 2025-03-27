@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}ورود به سامانه نظرسنجی{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <div class="text-center mb-4">
+            <h4 class="mb-3">ورود به سامانه نظرسنجی</h4>
+            <p class="text-muted">لطفاً برای ورود به سامانه، اطلاعات خود را وارد کنید</p>
+        </div>
+        
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="username" class="form-label">نام کاربری</label>
+                <input type="text" name="username" class="form-control" id="username" required>
+                <div class="invalid-feedback">
+                    لطفاً نام کاربری خود را وارد کنید
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label for="password" class="form-label">رمز عبور</label>
+                <input type="password" name="password" class="form-control" id="password" required>
+                <div class="invalid-feedback">
+                    لطفاً رمز عبور خود را وارد کنید
+                </div>
+            </div>
+
+            {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+                نام کاربری یا رمز عبور اشتباه است
+            </div>
+            {% endif %}
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary py-2">ورود به سامانه</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+{% endblock %}
+{% endblock %} 

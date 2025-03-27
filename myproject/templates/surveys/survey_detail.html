@@ -1,0 +1,386 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load jalali_tags %}
+
+{% block title %}{{ survey.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .question-card {
+        display: none;
+    }
+    .question-card.active {
+        display: block;
+    }
+    .progress {
+        height: 4px;
+        margin-bottom: 2rem;
+    }
+    .nav-buttons {
+        margin-top: 2rem;
+    }
+    .survey-header {
+        background: rgba(var(--bs-primary-rgb), 0.1);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+    }
+    .form-check {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+        background-color: #f8f9fa;
+    }
+    .form-check:hover {
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+        cursor: pointer;
+    }
+    .form-check-input {
+        margin: 0;
+        margin-left: 1rem;
+        transform: scale(1.2);
+        flex-shrink: 0;
+        position: relative;
+        float: none;
+    }
+    .form-check-label {
+        width: 100%;
+        padding: 0.5rem;
+        margin: 0;
+        margin-right: 0.5rem;
+        cursor: pointer;
+    }
+    .subsection-title {
+        color: #0d6efd;
+        margin-bottom: 1rem;
+    }
+    .comments-section {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #dee2e6;
+    }
+    .card {
+        border: none;
+        box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    }
+    .card-header {
+        background-color: #fff;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 1.5rem;
+    }
+    .card-body {
+        padding: 1.5rem;
+    }
+    .datetime-display {
+        text-align: center;
+        margin-top: 1rem;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .export-buttons {
+        margin-top: 1rem;
+        text-align: center;
+        display: none;
+    }
+    .export-buttons .btn {
+        margin: 0 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="survey-header">
+                <h3 class="mb-2">{{ survey.title }}</h3>
+                <p class="text-muted mb-0">{{ survey.description }}</p>
+            </div>
+
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+
+            <form id="surveyForm" method="post" action="{% url 'submit_survey' survey.id %}">
+                {% csrf_token %}
+                
+                {% if questions_without_subsection %}
+                    {% for question in questions_without_subsection %}
+                    <div class="card question-card {% if forloop.first and not questions_by_subsection %}active{% endif %}" 
+                         data-question="{{ forloop.counter }}">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">سوال {{ forloop.counter }}</h5>
+                                <span class="badge bg-primary">{{ forloop.counter }} از {{ questions_without_subsection|length }}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text mb-4">{{ question.text }}</p>
+
+                            {% if question.question_type == 'text' %}
+                            <div class="mb-3">
+                                <textarea name="question_{{ question.id }}" 
+                                        class="form-control" 
+                                        rows="4" 
+                                        required></textarea>
+                            </div>
+
+                            {% elif question.question_type == 'single' %}
+                            <div class="mb-3">
+                                {% for choice in question.choices.all %}
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="radio" 
+                                           name="question_{{ question.id }}" 
+                                           value="{{ choice.id }}" 
+                                           id="choice_{{ question.id }}_{{ choice.id }}" 
+                                           required>
+                                    <label class="form-check-label" 
+                                           for="choice_{{ question.id }}_{{ choice.id }}">
+                                        {{ choice.text }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                                
+                                <div class="comments-section">
+                                    <label class="form-label">توضیحات تکمیلی (اختیاری)</label>
+                                    <textarea name="comment_{{ question.id }}" 
+                                              class="form-control" 
+                                              rows="3" 
+                                              placeholder="در صورت نیاز توضیحات خود را اینجا بنویسید..."></textarea>
+                                </div>
+                            </div>
+
+                            {% else %}
+                            <div class="mb-3">
+                                {% for choice in question.choices.all %}
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           name="question_{{ question.id }}" 
+                                           value="{{ choice.id }}" 
+                                           id="choice_{{ question.id }}_{{ choice.id }}">
+                                    <label class="form-check-label" 
+                                           for="choice_{{ question.id }}_{{ choice.id }}">
+                                        {{ choice.text }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% for subsection, questions in questions_by_subsection.items %}
+                    {% for question in questions %}
+                    <div class="card question-card {% if forloop.first and forloop.parentloop.first and not questions_without_subsection %}active{% endif %}" 
+                         data-question="{{ forloop.counter }}" 
+                         data-subsection="{{ subsection.title }}">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-primary mb-2">{{ subsection.get_title_display }}</h6>
+                                    <h5 class="mb-0">سوال {{ forloop.counter }}</h5>
+                                </div>
+                                <span class="badge bg-primary">{{ forloop.counter }} از {{ questions|length }}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text mb-4">{{ question.text }}</p>
+
+                            {% if question.question_type == 'text' %}
+                            <div class="mb-3">
+                                <textarea name="question_{{ question.id }}" 
+                                        class="form-control" 
+                                        rows="4" 
+                                        required></textarea>
+                            </div>
+
+                            {% elif question.question_type == 'single' %}
+                            <div class="mb-3">
+                                {% for choice in question.choices.all %}
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="radio" 
+                                           name="question_{{ question.id }}" 
+                                           value="{{ choice.id }}" 
+                                           id="choice_{{ question.id }}_{{ choice.id }}" 
+                                           required>
+                                    <label class="form-check-label" 
+                                           for="choice_{{ question.id }}_{{ choice.id }}">
+                                        {{ choice.text }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                                
+                                <div class="comments-section">
+                                    <label class="form-label">توضیحات تکمیلی (اختیاری)</label>
+                                    <textarea name="comment_{{ question.id }}" 
+                                              class="form-control" 
+                                              rows="3" 
+                                              placeholder="در صورت نیاز توضیحات خود را اینجا بنویسید..."></textarea>
+                                </div>
+                            </div>
+
+                            {% else %}
+                            <div class="mb-3">
+                                {% for choice in question.choices.all %}
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           name="question_{{ question.id }}" 
+                                           value="{{ choice.id }}" 
+                                           id="choice_{{ question.id }}_{{ choice.id }}">
+                                    <label class="form-check-label" 
+                                           for="choice_{{ question.id }}_{{ choice.id }}">
+                                        {{ choice.text }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="nav-buttons d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-primary" id="prevBtn" disabled>
+                        <i class="bi bi-arrow-right me-1"></i>سوال قبلی
+                    </button>
+                    <button type="button" class="btn btn-primary" id="nextBtn">
+                        سوال بعدی<i class="bi bi-arrow-left ms-1"></i>
+                    </button>
+                    <button type="submit" class="btn btn-success" id="finishBtn" style="display: none;">
+                        پایان نظرسنجی<i class="bi bi-check-lg ms-1"></i>
+                    </button>
+                </div>
+
+                <div class="datetime-display" id="jalaliDateTime"></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const questions = document.querySelectorAll('.question-card');
+    const progressBar = document.querySelector('.progress-bar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const finishBtn = document.getElementById('finishBtn');
+    let currentQuestion = 1;
+    const totalQuestions = questions.length;
+
+    function updateQuestion(newQuestion) {
+        // Hide all questions
+        questions.forEach(q => q.classList.remove('active'));
+        
+        // Show current question
+        questions[newQuestion - 1].classList.add('active');
+        
+        // Update progress bar
+        const progress = ((newQuestion - 1) / (totalQuestions - 1)) * 100;
+        progressBar.style.width = `${progress}%`;
+        
+        // Update buttons
+        prevBtn.disabled = newQuestion === 1;
+        
+        if (newQuestion === totalQuestions) {
+            nextBtn.style.display = 'none';
+            finishBtn.style.display = 'block';
+        } else {
+            nextBtn.style.display = 'block';
+            finishBtn.style.display = 'none';
+        }
+        
+        currentQuestion = newQuestion;
+
+        // Show subsection title if available
+        const currentQuestionEl = questions[newQuestion - 1];
+        const subsectionTitle = currentQuestionEl.getAttribute('data-subsection');
+        if (subsectionTitle) {
+            document.querySelector('.subsection-title').textContent = subsectionTitle;
+        }
+    }
+
+    prevBtn.addEventListener('click', () => {
+        if (currentQuestion > 1) {
+            updateQuestion(currentQuestion - 1);
+        }
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (currentQuestion < totalQuestions) {
+            // Validate current question
+            const currentQuestionEl = questions[currentQuestion - 1];
+            const inputs = currentQuestionEl.querySelectorAll('input[required], textarea[required]');
+            let isValid = true;
+
+            inputs.forEach(input => {
+                if (input.required && !input.value) {
+                    isValid = false;
+                }
+                if (input.type === 'radio' && input.required) {
+                    const name = input.name;
+                    const checked = currentQuestionEl.querySelector(`input[name="${name}"]:checked`);
+                    if (!checked) {
+                        isValid = false;
+                    }
+                }
+            });
+
+            if (isValid) {
+                updateQuestion(currentQuestion + 1);
+            } else {
+                alert('لطفاً به این سوال پاسخ دهید');
+            }
+        }
+    });
+
+    // Form submission validation
+    document.getElementById('surveyForm').addEventListener('submit', function(e) {
+        const requiredInputs = this.querySelectorAll('input[required], textarea[required]');
+        let isValid = true;
+
+        requiredInputs.forEach(input => {
+            if (input.type === 'radio') {
+                const name = input.name;
+                const checked = document.querySelector(`input[name="${name}"]:checked`);
+                if (!checked) {
+                    isValid = false;
+                }
+            } else if (!input.value) {
+                isValid = false;
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('لطفاً به تمام سوالات پاسخ دهید');
+        }
+    });
+
+    // Add Jalali datetime display
+    function updateJalaliDateTime() {
+        const now = new Date();
+        fetch('/get_jalali_datetime/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('jalaliDateTime').textContent = data.datetime;
+            });
+    }
+
+    // Update datetime every minute
+    updateJalaliDateTime();
+    setInterval(updateJalaliDateTime, 60000);
+});
+</script>
+{% endblock %} 

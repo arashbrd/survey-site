@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load survey_tags %}
+
+{% block title %}نظرسنجی‌ها{% endblock %}
+
+{% block extra_css %}
+<style>
+    .section-card {
+        margin-bottom: 2rem;
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+    }
+    .survey-item {
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+    .survey-item:hover {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border-color: #adb5bd;
+    }
+    .survey-title {
+        color: #0d6efd;
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+    }
+    .survey-description {
+        color: #6c757d;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+    }
+    .completion-info {
+        background-color: #e8f4f8;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+    }
+    .pdf-download {
+        margin-top: 0.75rem;
+    }
+    .pdf-download .btn {
+        padding: 0.4rem 1rem;
+        font-size: 0.9rem;
+    }
+    .section-title {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        {% if messages %}
+        <div class="col-12 mb-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="col-md-6">
+            <div class="section-card">
+                <h4 class="section-title">بخش اول</h4>
+                {% if section1_surveys %}
+                    {% for survey in section1_surveys %}
+                    <div class="survey-item">
+                        <h5 class="survey-title">{{ survey.title }}</h5>
+                        <p class="survey-description">{{ survey.description }}</p>
+                        
+                        {% with completed_info=request.session.completed_surveys|get_item:survey.id|default:None %}
+                            {% if completed_info and completed_info.section == 'section1' %}
+                                <div class="completion-info">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        <span>تکمیل شده در تاریخ: {{ completed_info.completion_time }}</span>
+                                    </div>
+                                    <div class="pdf-download">
+                                        <a href="{% url 'export_pdf' survey.id 'section1' %}" class="btn btn-outline-primary" target="_blank">
+                                            <i class="bi bi-file-pdf me-1"></i>
+                                            دانلود PDF پاسخ‌ها
+                                        </a>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <a href="{% url 'survey_detail' survey.id %}" class="btn btn-primary">
+                                    شروع نظرسنجی
+                                </a>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">نظرسنجی در این بخش موجود نیست.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="section-card">
+                <h4 class="section-title">بخش دوم</h4>
+                {% if section2_surveys %}
+                    {% for survey in section2_surveys %}
+                    <div class="survey-item">
+                        <h5 class="survey-title">{{ survey.title }}</h5>
+                        <p class="survey-description">{{ survey.description }}</p>
+                        
+                        {% with completed_info=request.session.completed_surveys|get_item:survey.id|default:None %}
+                            {% if completed_info and completed_info.section == 'section2' %}
+                                <div class="completion-info">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        <span>تکمیل شده در تاریخ: {{ completed_info.completion_time }}</span>
+                                    </div>
+                                    <div class="pdf-download">
+                                        <a href="{% url 'export_pdf' survey.id 'section2' %}" class="btn btn-outline-primary" target="_blank">
+                                            <i class="bi bi-file-pdf me-1"></i>
+                                            دانلود PDF پاسخ‌ها
+                                        </a>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <a href="{% url 'survey_detail' survey.id %}" class="btn btn-primary">
+                                    شروع نظرسنجی
+                                </a>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">نظرسنجی در این بخش موجود نیست.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

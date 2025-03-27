@@ -1,0 +1,90 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <style>
+    .report-container {
+      margin: 20px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .question-block {
+      margin-bottom: 30px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .question-title {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #417690;
+    }
+    .response-list {
+      list-style: none;
+      padding-left: 0;
+    }
+    .response-item {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    .response-item:last-child {
+      border-bottom: none;
+    }
+    .choice-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .choice-bar {
+      height: 20px;
+      background: #79aec8;
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+    .export-button {
+      margin: 20px 0;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="report-container">
+    <h1>{{ survey.title }} - گزارش پاسخ‌ها</h1>
+    
+    <div class="export-button">
+        <a href="{% url 'admin:survey-export' survey.id %}" class="button">
+            دانلود گزارش CSV
+        </a>
+    </div>
+
+    {% for data in responses_data %}
+    <div class="question-block">
+        <div class="question-title">{{ data.question }}</div>
+        
+        {% if data.type == 'text' %}
+            <ul class="response-list">
+                {% for response in data.responses %}
+                    <li class="response-item">{{ response }}</li>
+                {% empty %}
+                    <li class="response-item">هیچ پاسخی ثبت نشده است.</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            {% for response in data.responses %}
+                <div class="choice-stat">
+                    <span>{{ response.choice }}: {{ response.count }} پاسخ</span>
+                    <div class="choice-bar" style="width: {{ response.count }}0px;"></div>
+                </div>
+            {% empty %}
+                <p>هیچ پاسخی ثبت نشده است.</p>
+            {% endfor %}
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %} 
