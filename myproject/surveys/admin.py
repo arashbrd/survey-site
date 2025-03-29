@@ -11,6 +11,11 @@ from django.utils import timezone
 from django.utils.html import format_html
 from jalali_date import datetime2jalali, date2jalali
 from jalali_date.admin import ModelAdminJalaliMixin, StackedInlineJalaliMixin, TabularInlineJalaliMixin
+from django.contrib import admin
+
+admin.site.site_header = "مدیریت سایت پایش درمان"
+admin.site.site_title = "مدیریت سایت"
+admin.site.index_title = "داشبورد مدیریت"
 
 # Unregister the Group model from admin
 admin.site.unregister(Group)

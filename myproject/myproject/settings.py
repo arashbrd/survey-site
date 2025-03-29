@@ -34,7 +34,15 @@ SECRET_KEY = 'django-insecure-$6^2tu+icjlpb7w6&2k*le2m0p-bbzw-zk(i!j0n8r)k2nz%y4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['192.168.230.79']
+ALLOWED_HOSTS = ['192.168.230.79','5.190.209.79','dpayesh.fums.ac.ir',"localhost", "127.0.0.1", "nginx", "app"]
+# ALLOWED_HOSTS = ["*"]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://dpayesh.fums.ac.ir",
+    "http://dpayesh.fums.ac.ir"
+]
 
 
 # Application definition
@@ -127,11 +135,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+# STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'survey_sections'
